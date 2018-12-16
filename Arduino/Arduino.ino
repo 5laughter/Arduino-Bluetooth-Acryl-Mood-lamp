@@ -4,12 +4,13 @@
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
-#define NUMPIXELS
+#define PIN 13
+#define NUMPIXELS 4
 #define BRIGHTNESS 255
 
-SoftwareSerial bluetooth(2, 3); 
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRBW + NEO_KHZ800);
 
-int neoPixelPin = 13;
+SoftwareSerial bluetooth(2, 3);
 
 String bluetoothString = "";
 
@@ -32,13 +33,33 @@ void loop() {
 
   if(!bluetooth.equals("")){
     Serial.println("bluetooth value : " + bluetoothString);
+    bluetoothString.toCharArray(bluetoothString, 50);
     
-    String rString = bluetoothString.substring(1, 2);
-    String gString = bluetoothString.substring(3, 4);
-    String bString = bluetoothString.substring(5, 6);
+    char red[5] = {0};
+    char green[5] = {0};
+    char blue[5] = {0};
 
-    int r = x2i(rString);
-    int g = x2i(gString);
-    int b = x2i(bString);
+    red[0] = green[0] = blue[0] = '0';
+    red[1] = green[1] = blue[1] = 'X';
+
+    red[2] = bluetoothString[1];
+    red[3] = bluetoothString[2];
+
+    green[2] = bluetoothString[3];
+    green[3] = bluetoothString[4];
+
+    blue[2] = bluetoothString[5];
+    blue[3] = bluetoothString[6];
+
+    int r = strtol(red, NULL, 16);
+    int g = strtol(green, NULL, 16);
+    int b = strtol(blue, NULL, 16);
+    
+    int i = 0;
+    for(i=0; i<=NUMPIXELS; i++){      
+      pixels.setPixelColor(i, r, g, b, 0);
+      pixels.show();
+      delay(50);
+    }
   }
 }
